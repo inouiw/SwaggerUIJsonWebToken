@@ -23,3 +23,9 @@ Swagger UI does not support the OAuth 2.0 implicit grant flow with id_token. Swa
 Alternatively to OAuth, swagger-ui also supports OpenID Connect (OIDC), but not the implicit flow but only the authorisation code flow. In that case the response from the authorization provider with the code is redirected to the server to a `oauth2-redirect.html` file, then the client secret is sent to the client together with the code. For me this seems wrong because the client secret should stay on the server.
 
 However swagger-ui offers very nice ways to extend and customize almost everything. So I made use of `wrapActions` that are just JavaScript methods which get called any time when a call to the wrapped action is made. (See https://swagger.io/docs/open-source-tools/swagger-ui/customization/overview/) I created two wrapActions, one to modify the response_type and one to validate the nonce value.
+
+### Some notes
+
+To intercept the HTTP Traffic, I use the cross-platform open source HTTP Toolkit.
+
+If you get the error ` 400: redirect_uri_mismatch` from the authentication provider, as google, then you need to add your URIs as `https://localhost:7253/swagger/oauth2-redirect.html` to the "Authorized redirect URIs". For google you can set it in the Google Cloud Console. In this application it is never redirected to the redirect url because the client receives the response from the authentication provider but the redirect link is not followed because it is not needed.
