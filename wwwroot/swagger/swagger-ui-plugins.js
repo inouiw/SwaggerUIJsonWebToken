@@ -6,13 +6,22 @@ const SwaggerUIStatePlugins = function (system) {
         wrapActions: {
           // Called when you click in the 'Authorize' in the Authorize pop-up.
           authPopup: (oriAction, system) => (url, swaggerUIRedirectOauth2) => {
-            let nonce = system.nonceValue; // see rootInjects
-            let urlNew = url.replace('response_type=token', `response_type=token id_token&nonce=${nonce}`);
-            console.log('url from authPopup wrapAction: ' + urlNew);
-            return oriAction(urlNew, swaggerUIRedirectOauth2)
+            const tokenName = system.specSelectors.securityDefinitions().get('Bearer').get('x-tokenName');
+            let newUrl = url;
+
+            if (typeof tokenName === 'string' && tokenName.indexOf('id_token') !== -1) {
+              let nonce = system.nonceValue; // see rootInjects
+              newUrl = url.replace('response_type=token', `response_type=token id_token&nonce=${nonce}`);
+              // console.log('url from authPopup wrapAction: ' + newUrl);
+            }
+            else
+            {
+              console.log("'x-tokenName' not set to 'id_token' in securityDefinitions, so not using id_token.");
+            }
+            return oriAction(newUrl, swaggerUIRedirectOauth2)
           },
           authorizeOauth2WithPersistOption: (oriAction, system) => ({ auth, token }) => {
-            console.log('auth from authorizeOauth2WithPersistOption wrapAction: ' + JSON.stringify(auth));
+            // console.log('auth from authorizeOauth2WithPersistOption wrapAction: ' + JSON.stringify(auth));
             let jwtToken = token['id_token'];
             let jwtTokenNonce = parseJwt(jwtToken)['nonce'];
             let submittedNonce = system.nonceValue; // see rootInjects
@@ -44,7 +53,7 @@ function parseJwt(token) {
   return JSON.parse(jsonPayload);
 }
 
-// method from https://github.com/swagger-api/swagger-ui/issues/3517
+// Source: https://github.com/swagger-api/swagger-ui/issues/3517
 function randomNonce() {
   let length = 12;
   let text = "";

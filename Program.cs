@@ -29,7 +29,8 @@ builder.Services.AddSwaggerGen(options =>
     Type = SecuritySchemeType.OAuth2,
     Extensions =
     {
-      // The name of the value from the response of the auth provider to use as bearer token.
+      // Setting x-tokenName to id_token will send response_type=token id_token and the nonce to the auth provider.
+      //  x-tokenName also specifieds the name of the value from the response of the auth provider to use as bearer token.
       { "x-tokenName", new OpenApiString("id_token") }
     },
     Flows = new OpenApiOAuthFlows
