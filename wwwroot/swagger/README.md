@@ -1,0 +1,1 @@
+"dist" folder of a self-build swagger-ui-4.12.0 with webpack config value "devtool" set to "'source-map'" to enable source maps in chrome.
