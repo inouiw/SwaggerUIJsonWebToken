@@ -43,6 +43,12 @@ If you get the error `400: redirect_uri_mismatch` from the authentication provid
 
 The main file `Program.cs` contains a client-id that I created. You can use [Google Could Console](https://console.cloud.google.com/) to generate your own google client-id.
 
+### Debugging
+
+After starting the solution and opening the browser developer tools, you should be able to see `SwaggerUIBundle` in the Sources tab. You can browse the Swagger-UI source code and set breakpoints.
+
+![Source Maps Debugging Screenshot](source-maps-debugging-screenshot.png)
+
 ### Contributors
 
 David Neuy
