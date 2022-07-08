@@ -15,6 +15,9 @@
 - If the signature of the JTW is valid, then the data contained in the id-token can be trusted. For example the e-mail address.
 - The used swagger-ui-4.12.0 library is self-build with webpack config value `devtool` set to `'source-map'` to enable debugging the swagger-ui sources in chrome or firefox. This is useful because the latest swagger-ui releases cannot be debugged because the browser is unable to load the source files. 
 
+### How to run
+
+todo
 
 ### Details
 
@@ -26,6 +29,6 @@ However swagger-ui offers very nice ways to extend and customize almost everythi
 
 ### Some notes
 
-To intercept the HTTP Traffic, I use the cross-platform open source HTTP Toolkit.
+To intercept the HTTPS Traffic, I use the cross-platform open source HTTP Toolkit.
 
-If you get the error ` 400: redirect_uri_mismatch` from the authentication provider, as google, then you need to add your URIs as `https://localhost:7253/swagger/oauth2-redirect.html` to the "Authorized redirect URIs". For google you can set it in the Google Cloud Console. In this application it is never redirected to the redirect url because the client receives the response from the authentication provider but the redirect link is not followed because it is not needed.
+If you get the error `400: redirect_uri_mismatch` from the authentication provider, as google, then first restart the server and check again, if the error appears again you will likely need to add your URIs as `https://localhost:7253/swagger/oauth2-redirect.html` to the "Authorized redirect URIs". For google you can set it in the Google Cloud Console. In this application it is never redirected to the redirect url because the client receives the response from the authentication provider but the redirect link is not followed because it is not needed.

@@ -13,44 +13,48 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddHttpLogging(options =>
   options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestPath);
+
 builder.Services.AddEndpointsApiExplorer();
 
-var securityScheme = new OpenApiSecurityScheme
+builder.Services.AddSwaggerGen(options =>
 {
-  Type = SecuritySchemeType.OAuth2,
-  Extensions = 
+  var securitySchemeName = "Bearer";
+  options.SwaggerDoc("v1", new OpenApiInfo
   {
-    { "x-tokenName", new OpenApiString("id_token") }
-  },
-  Flows = new OpenApiOAuthFlows
+    Title = "Implicit JWT Authentication Example",
+    Version = "v1"
+  });
+  options.AddSecurityDefinition(securitySchemeName, new OpenApiSecurityScheme
   {
-    Implicit = new OpenApiOAuthFlow
+    Type = SecuritySchemeType.OAuth2,
+    Extensions =
     {
-      AuthorizationUrl = new Uri(authorizationUrl), 
-      Scopes = scopesToRequestFromUser.ToDictionary(x => x, _ => "")
-    }
-  }
-};
-
-string securitySchemeName = "Bearer";
-var securitySchemeReference = new OpenApiSecurityScheme
-{
-  Reference = new OpenApiReference
+      // The name of the value from the response of the auth provider to use as bearer token.
+      { "x-tokenName", new OpenApiString("id_token") }
+    },
+    Flows = new OpenApiOAuthFlows
+    {
+      Implicit = new OpenApiOAuthFlow
+      {
+        AuthorizationUrl = new Uri(authorizationUrl),
+        Scopes = scopesToRequestFromUser.ToDictionary(x => x, _ => "")
+      }
+    },
+  });
+  options.AddSecurityRequirement(new OpenApiSecurityRequirement
   {
-    Type = ReferenceType.SecurityScheme,
-    Id = securitySchemeName
-  }
-};
-
-var securityRequirement = new OpenApiSecurityRequirement
-{
-    { securitySchemeReference, new List<string>() }
-};
-
-builder.Services.AddSwaggerGen(x =>
-{
-  x.AddSecurityDefinition(securitySchemeName, securityScheme);
-  x.AddSecurityRequirement(securityRequirement);
+    {
+      new OpenApiSecurityScheme
+      {
+        Reference = new OpenApiReference
+        {
+          Type = ReferenceType.SecurityScheme,
+          Id = securitySchemeName
+        }
+      },
+      new List<string>()
+    }
+  });
 });
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -82,14 +86,15 @@ app.UseSwaggerUI(options =>
   options.IndexStream = () => new FileStream($"./wwwroot/swagger/index_custom.html", FileMode.Open);
 });
 
+app.UseStaticFiles();
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
 app.MapPost("/authentication-info", (IConfiguration config, HttpContext context) =>
 {
-    var userClaims = context.User.Claims.Select(c => new UserClaimResult(c.Type, c.Value)).ToList();
-    bool isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
-    return new AuthenticationInfoResult(isAuthenticated, userClaims);
+  var userClaims = context.User.Claims.Select(c => new UserClaimResult(c.Type, c.Value)).ToList();
+  bool isAuthenticated = context.User.Identity?.IsAuthenticated ?? false;
+  return new AuthenticationInfoResult(isAuthenticated, userClaims);
 });
 
 app.MapGet("/", () => Results.Redirect("/swagger")).ExcludeFromDescription();
