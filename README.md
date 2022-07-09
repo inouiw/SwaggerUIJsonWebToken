@@ -1,4 +1,4 @@
-## Example ASP.NET Core (.NET 6) minimal web API project with implicit OAuth flow JSON Web Token authentication
+## Swagger-UI example using ASP.NET Core (.NET 6) minimal web API project with implicit OAuth flow JSON Web Token authentication
 
 ### Goals
 
