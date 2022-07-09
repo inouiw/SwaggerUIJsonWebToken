@@ -13,9 +13,6 @@ var swaggerUIRoutePrefix = "swagger";
 
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpLogging(options =>
-  options.LoggingFields = Microsoft.AspNetCore.HttpLogging.HttpLoggingFields.RequestPath);
-
 builder.Services.AddEndpointsApiExplorer();
 
 builder.Services.AddSwaggerGen(options =>
@@ -80,7 +77,12 @@ var app = builder.Build();
 
 // Configure the HTTP request pipeline.
 
-app.UseHttpLogging();
+app.Use(async (context, next) =>
+{
+    Console.WriteLine($"{context.Request.Method} {context.Request.Path}");
+
+    await next();
+});
 
 // Avoid that SwaggerUI middleware returns its own copy of the swagger-ui assets.
 // Instead serve files from custom swagger-ui build with sourcemaps in wwwroot.
