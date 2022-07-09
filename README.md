@@ -6,16 +6,6 @@
 2. Show how to validate a JWT in ASP.NET Core with a few lines of code and without needing IdentityServer or database tables.
 3. Show how to use a self-build swagger-ui artifacts that allow debugging swagger-ui sources. 
 
-### Features
-
-- The id-token generation is started when the user clicks on the swagger-ui "Authorize" button and selects the scopes. To generate the id-token the browser authorizes with the OAuth provider. The custom swagger-ui plugin checks if the submitted nonce matches the nonce in the JWT. Google is used as token provider.
-- Swagger-ui uses the id-token for all calls to the server by adding a Bearer authorization header.
-- The server validates the JWT in the header using the `Microsoft.AspNetCore.Authentication.JwtBearer` middleware. The middleware uses the public key from the MetadataAddress (.well-known/openid-configuration) to validate the token. The public key is cached and refreshed, if expired, by the middleware. Creation of database tables is not needed.
-- After the middleware authenticates the token, the claims from the id-token can be accessed in `context.User.Claims` as demonstrated in the `/authentication-info` resource.
-- The ClientSecret is not needed at all.
-- If the signature of the JTW is valid, then the data contained in the id-token can be trusted. For example the e-mail address.
-- The used swagger-ui-4.12.0 library is self-build with the webpack config value `devtool` set to `'source-map'` to enable debugging the swagger-ui sources in chrome or firefox. This is useful because the latest swagger-ui releases cannot be debugged because the browser is unable to load the source files. 
-
 ### How to run
 
 Clone the repository  
@@ -28,22 +18,23 @@ Press `F5` to debug
 
 ### About the code
 
-#### File `Program.cs`
+File `Program.cs`
 
 - Configures a ASP.NET minimal web api application.
 - Adds the middleware: Swagger, SwaggerUI, Authentication with JwtBearer.
-- Adds a endpoint that, when called, returns the authentication status of the caller and the scopes in the Bearer JTW.
+- Verifies the id-token signature, issuer, audience, expirationtime using the `Microsoft.AspNetCore.Authentication.JwtBearer` package. Note that the public key is cached and refreshed, if expired, by the middleware.
+- Adds a endpoint that, when called, returns the authentication status of the caller and the claims in the Bearer JWT. The claims are accessible in `context.User.Claims`.
 - Adds a route which loads swagger-ui artifacts from `wwwroot/swagger` instead of using the sources from the middleware.
 
-### File `wwwroot/swagger-extensions/my-index.html`
+File `wwwroot/swagger-extensions/my-index.html`
 
 - Contains the swagger-ui index.html modified to load the default export of `my-swagger-ui-plugins.js` as swagger-ui plugin.
 
-### File `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
+File `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
 
-- Contains wrapActions that add custom behavior to the swagger-ui actions authPopup and authorizeOauth2WithPersistOption. The actions modify the token endpoint URL to include `id_token` and `nonce` and verify the returned `nonce`.
+- Contains wrapActions that add custom behavior to the swagger-ui actions authPopup and authorizeOauth2WithPersistOption. The actions modify the token endpoint URL to include `response_type=token id_token` and `nonce=<random value>` and verify the returned `nonce` value.
 
-### Folder `wwwroot/swagger`
+Folder `wwwroot/swagger`
 
 - Contains a build of wagger-ui-4.12.0 with sourcemaps enabled.
 
