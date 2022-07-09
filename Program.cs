@@ -80,7 +80,6 @@ var app = builder.Build();
 app.Use(async (context, next) =>
 {
     Console.WriteLine($"{context.Request.Method} {context.Request.Path}");
-
     await next();
 });
 
