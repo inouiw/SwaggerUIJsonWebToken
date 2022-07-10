@@ -21,14 +21,14 @@ Press `F5` to debug
 File `Program.cs`
 
 - Configures a ASP.NET minimal web api application.
-- Adds the middleware: Swagger, SwaggerUI, Authentication with JwtBearer.
+- Adds the middleware: Swagger, SwaggerUI, Authentication with JwtBearer, and other.
 - Verifies the id-token Signature, Issuer, Audience and ExpirationTime using the `Microsoft.AspNetCore.Authentication.JwtBearer` package. Note that the public key is cached and refreshed, if expired, by the middleware.
 - Adds an endpoint that, when called, returns the authentication status of the caller and the claims in the Bearer JWT. The claims are accessible in `context.User.Claims`.
 - Adds a route which loads swagger-ui artifacts from `wwwroot/swagger` instead of using the sources from the middleware.
 
 File `wwwroot/swagger-extensions/my-index.html`
 
-- Contains the swagger-ui index.html modified to load the default export of `my-swagger-ui-plugins.js` as swagger-ui plugin.
+- Contains the swagger-ui index.html modified to load the default export of `my-swagger-ui-plugins.js` and assings it to the configObject plugins array.
 
 File `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
 
