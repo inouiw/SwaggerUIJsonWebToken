@@ -4,7 +4,7 @@
 
 1. Show how to request an id_token with the implicit auth flow from swagger-ui.
 2. Show how to validate a JWT in ASP.NET Core with a few lines of code and without needing IdentityServer or database tables.
-3. Show how to use a self-build swagger-ui artifacts that allow debugging swagger-ui sources. 
+3. Show how to use a self-build swagger-ui artifacts that allow debugging swagger-ui JavaScript sources. 
 
 ### How to run
 
