@@ -38,7 +38,6 @@ Folder `wwwroot/swagger`
 
 - Contains a build of wagger-ui-4.12.0 with sourcemaps enabled.
 
-
 ### Details
 
 Swagger UI does not support the OAuth 2.0 implicit grant flow with id_token. Swagger supports OAuth2 implicit flow but it always sets `response_type=token` in the request (see https://github.com/swagger-api/swagger-ui/blob/570d26a0908e7d8cc3c3193e5d9ecbe63e494c0e/src/core/oauth2-authorize.js#L23), however `response_type=token id_token` is required.
@@ -50,14 +49,23 @@ I created two wrapActions, one to modify the response_type and set a random nonc
 
 ### What is the difference between the implicit flow with id-token and the authorization code flow?
 
-With the implicit flow the client receives the claims reply as JWT/id-token. The client can use the claims only in the single-page-app or it can use the id-token to authenticate (and maybe also authorize) with the server. To authenticate with the server the client app sends the id-token in the authorization header. The server can verify if the claims in the id-token can be trusted by verifying the token signature using a public key from the `.well-known/openid-configuration`.  
-Note that you can always use an id-token to authenticate the user but to authorize a user with an id-token it would be required that the token contains all claims that you need to determine if a user is allowed to access a resource. 
+With the implicit flow the client receives the claims reply as JWT/id-token. The client can use the claims only in the single-page-app or it can use the id-token to authenticate (see [why-not-authorizie](#when-to-use-the-oauth2-authorizaiton-framework-only-for-authenticating-not-for-authorizing-the-user)) with the server. To authenticate with the server the client app sends the id-token in the authorization header. The server can verify if the claims in the id-token can be trusted by verifying the token signature using a public key from the `.well-known/openid-configuration`.  
+Also see [what-are-the-advantages-of-the-implicit-flow](#what-are-the-advantages-of-the-implicit-flow)
 
 With the authorization code flow the client requests a authorization code which is then send to the server. The server uses the code and the client secret to request a access token and refresh token. Then the server can use the access token to get the user claims. The server will have to set some cookie or generate a JWT for the client to know that it is now authenticated. An advantage if you generate the JWT yourself is that you can add custom claims, although the token should not be too large.
 
 ### What are the advantages of the implicit flow?
 
 As can be seen in the above description, with the implicit flow, the id-token can be used by the client to authenticate. With the authorization code flow a server request is needed and the code cannot be used by the client to authenticate because it expires soon.
+
+### When to use the OAuth2 authorizaiton framework only for authenticating not for authorizing the user?
+
+With OAuth authorization the user gives another application access to scopes. For example the user can authorize your app to access the scope email address or calendar. 
+
+For your server code, authorization means to decide if the user is allowed to access a resource.
+
+If you can create your own scopes, and assign scopes to users with your OAuth2 solution then you are using OAuth2 for authorization. One scope could mean access to a resource as /your-server-status.  
+However you can also just use the scope email that is offered by free OAuth providers as google to authenticate the user. To decide if the user is authorized for a resource, you can extend your data model, that probalbly already contains a user entity, with a roles or claims entity. Then, in the authorization middleware, you can use the authenticated users email claim and the roles/claims in the database to decide if the user is authorized to access the requested resource.
 
 ### Some notes
 
