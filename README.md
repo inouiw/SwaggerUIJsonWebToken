@@ -55,7 +55,7 @@ I created two wrapActions, one to modify the response_type and set a random nonc
 With the *implicit flow with id-token* the client receives the claims reply as JWT/id-token. The client can use the claims only in the single-page-app or it can use the id-token to authenticate (see [why-not-authorizie](#when-to-use-the-oauth2-authorizaiton-framework-only-for-authenticating-not-for-authorizing-the-user)) with the server. To authenticate with the server the client app sends the id-token in the authorization header. The server can verify if the claims in the id-token can be trusted by verifying the token signature using a public key from the `.well-known/openid-configuration`.  
 Also see [what-are-the-advantages-of-the-implicit-flow](#what-are-the-advantages-of-the-implicit-flow)
 
-### What is the  and authorization code flow?
+### What is the authorization code flow?
 
 With the *authorization code flow* the client requests a authorization code which is then send to the server. The server uses the code and the client secret to request a access token and refresh token. Then the server can use the access token to get the user claims. The server will have to set some cookie or generate a JWT for the client to know that it is now authenticated. An advantage, if you generate the JWT yourself, is that you can add custom claims, although the token should not be too large.
 
@@ -69,7 +69,7 @@ With OAuth authorization the user gives another application access to scopes. Fo
 
 You can use OAuth for authorization if you want to store which user has access to which resource with the OAuth provider. However if you have hundreds of resources this becomes difficult to manage. So then you may decide to just store roles with the authorization provider. But if the authorization provider only provides roles then the decision if the role is authorized to access a resource is still in your application. So you are not really using OAuth for authorization.
 
-Since it is not always possible or easy to store custom claims with a fee OAuth provider, you can also just use the scope email that is offered by eg google to authenticate the user. To decide if the user is authorized for a resource, you can extend your data model, that probalbly already contains a user entity, with a roles or claims entity. Then, in the authorization middleware, you can use the authenticated users email claim and the roles/claims in the database to decide if the user is authorized to access the requested resource.
+Since it is not always possible or easy to store custom claims with a fee OAuth provider, you can also just use the scope email that is offered by eg. Google to authenticate the user. To decide if the user is authorized for a resource, you can extend your data model, that probalbly already contains a user entity, with a roles or claims entity. Then, in the authorization middleware, you can use the authenticated users email claim and the roles/claims in the database to decide if the user is authorized to access the requested resource.
 
 ### Some notes
 
