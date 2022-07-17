@@ -28,31 +28,36 @@ File `Program.cs`
 
 File `wwwroot/swagger-extensions/my-index.html`
 
-- Contains the swagger-ui index.html modified to load the default export of `my-swagger-ui-plugins.js` and assings it to the configObject plugins array.
+- Contains the swagger-ui index.html modified to load the default export of `my-swagger-ui-plugins.js` and assigns it to the `configObject.plugins` array.
 
-File `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
+
+  
+  
+  File `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
 
 - Contains `wrapActions` that add custom behavior to the swagger-ui actions `authPopup` and `authorizeOauth2WithPersistOption`. The actions modify the token endpoint URL to include `response_type=token id_token` and `nonce=<random value>` and verify the returned `nonce` value.
 
 Folder `wwwroot/swagger`
 
-- Contains a build of wagger-ui-4.12.0 with sourcemaps enabled.
+- Contains a build of wagger-ui-4.12.0 with sourcemaps.
 
 ### Details
 
-Swagger UI does not support the OAuth 2.0 implicit grant flow with id_token. Swagger supports OAuth2 implicit flow but it always sets `response_type=token` in the request (see https://github.com/swagger-api/swagger-ui/blob/570d26a0908e7d8cc3c3193e5d9ecbe63e494c0e/src/core/oauth2-authorize.js#L23), however `response_type=token id_token` is required.
+Swagger UI does not support the OAuth 2.0 implicit grant flow with id_token. Swagger supports OAuth2 implicit flow but it always sets `response_type=token` in the request (see [oauth2-authorize.js](https://github.com/swagger-api/swagger-ui/blob/570d26a0908e7d8cc3c3193e5d9ecbe63e494c0e/src/core/oauth2-authorize.js#L23)), however `response_type=token id_token` is required.
 
 As alternative to OAuth, swagger-ui also supports OpenID Connect (OIDC), however not the implicit flow but only the authorization code flow. In that case the response from the authorization provider with the code is redirected to the server to a `oauth2-redirect.html` file, then the client secret is sent to the browser together with the code. For me this seems wrong because the client secret should stay on the server. Also the implicit id-token flow has [advantages](#what-are-the-advantages-of-the-implicit-flow).
 
 However, swagger-ui offers very nice ways to extend and customize almost everything. So, I made use of `wrapActions` that are just JavaScript methods which get called any time when a call to the wrapped action is made. (See [Plugin system overview](https://swagger.io/docs/open-source-tools/swagger-ui/customization/overview/))  
 I created two wrapActions, one to modify the response_type and set a random nonce and one to validate the nonce value. See `wwwroot/swagger-extensions/my-swagger-ui-plugins.js`
 
-### What is the difference between the implicit flow with id-token and the authorization code flow?
+### What is the Implicit flow with id-token?
 
-With the implicit flow the client receives the claims reply as JWT/id-token. The client can use the claims only in the single-page-app or it can use the id-token to authenticate (see [why-not-authorizie](#when-to-use-the-oauth2-authorizaiton-framework-only-for-authenticating-not-for-authorizing-the-user)) with the server. To authenticate with the server the client app sends the id-token in the authorization header. The server can verify if the claims in the id-token can be trusted by verifying the token signature using a public key from the `.well-known/openid-configuration`.  
+With the *implicit flow with id-token* the client receives the claims reply as JWT/id-token. The client can use the claims only in the single-page-app or it can use the id-token to authenticate (see [why-not-authorizie](#when-to-use-the-oauth2-authorizaiton-framework-only-for-authenticating-not-for-authorizing-the-user)) with the server. To authenticate with the server the client app sends the id-token in the authorization header. The server can verify if the claims in the id-token can be trusted by verifying the token signature using a public key from the `.well-known/openid-configuration`.  
 Also see [what-are-the-advantages-of-the-implicit-flow](#what-are-the-advantages-of-the-implicit-flow)
 
-With the authorization code flow the client requests a authorization code which is then send to the server. The server uses the code and the client secret to request a access token and refresh token. Then the server can use the access token to get the user claims. The server will have to set some cookie or generate a JWT for the client to know that it is now authenticated. An advantage if you generate the JWT yourself is that you can add custom claims, although the token should not be too large.
+### What is the  and authorization code flow?
+
+With the *authorization code flow* the client requests a authorization code which is then send to the server. The server uses the code and the client secret to request a access token and refresh token. Then the server can use the access token to get the user claims. The server will have to set some cookie or generate a JWT for the client to know that it is now authenticated. An advantage, if you generate the JWT yourself, is that you can add custom claims, although the token should not be too large.
 
 ### What are the advantages of the implicit flow?
 
@@ -60,12 +65,11 @@ As can be seen in the above description, with the implicit flow, the id-token ca
 
 ### When to use the OAuth2 authorizaiton framework only for authenticating not for authorizing the user?
 
-With OAuth authorization the user gives another application access to scopes. For example the user can authorize your app to access the scope email address or calendar. 
+With OAuth authorization the user gives another application access to scopes. For example the user can authorize your app to access the scope email address or calendar by requesting a token with these scopes. In the swagger authorize pop-up it is described as follows: *"Scopes are used to grant an application different levels of access to data on behalf of the end user. Each API may declare one or more scopes."*
 
-For your server code, authorization means to decide if the user is allowed to access a resource.
+You can use OAuth for authorization if you want to store which user has access to which resource with the OAuth provider. However if you have hundreds of resources this becomes difficult to manage. So then you may decide to just store roles with the authorization provider. But if the authorization provider only provides roles then the decision if the role is authorized to access a resource is still in your application. So you are not really using OAuth for authorization.
 
-If you can create your own scopes, and assign scopes to users with your OAuth2 solution then you are using OAuth2 for authorization. One scope could mean access to a resource as /your-server-status.  
-However you can also just use the scope email that is offered by free OAuth providers as google to authenticate the user. To decide if the user is authorized for a resource, you can extend your data model, that probalbly already contains a user entity, with a roles or claims entity. Then, in the authorization middleware, you can use the authenticated users email claim and the roles/claims in the database to decide if the user is authorized to access the requested resource.
+Since it is not always possible or easy to store custom claims with a fee OAuth provider, you can also just use the scope email that is offered by eg google to authenticate the user. To decide if the user is authorized for a resource, you can extend your data model, that probalbly already contains a user entity, with a roles or claims entity. Then, in the authorization middleware, you can use the authenticated users email claim and the roles/claims in the database to decide if the user is authorized to access the requested resource.
 
 ### Some notes
 
